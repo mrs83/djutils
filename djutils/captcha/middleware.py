@@ -1,9 +1,4 @@
-try:
-    from threading import local
-except ImportError:
-    from django.utils._threading_local import local
-
-_thread_locals = local()
+from djutils.middleware.threadlocals import _thread_locals
 
 def get_current_captcha():
     return getattr(_thread_locals, 'captcha', None)
