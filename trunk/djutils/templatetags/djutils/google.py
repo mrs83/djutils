@@ -6,7 +6,7 @@ register = Library()
 
 def urchin():
     if not getattr(settings, 'GOOGLE_ANALYTICS_KEY'):
-        raise ImproperlyConfigured, 'GOOGLE_ANALYTICS_KEY is required'
+        raise ImproperlyConfigured, 'GOOGLE_ANALYTICS_KEY setting is required'
     return """
 <script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
 </script>
