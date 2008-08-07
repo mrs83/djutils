@@ -1,4 +1,4 @@
-from django import newforms as forms
+from django import forms
 from django.newforms.util import flatatt
 from django.utils.html import escape
 from django.utils.encoding import force_unicode
