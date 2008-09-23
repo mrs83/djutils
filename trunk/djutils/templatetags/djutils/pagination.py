@@ -1,4 +1,3 @@
-from urlparse import urlparse
 from django import template
 
 register = template.Library()
@@ -16,18 +15,17 @@ def paginator(context, adjacent_pages=2):
     You must add 'django.core.context_processors.request' to your
     TEMPLATE_CONTEXT_PROCESSORS setting.
     """
-    request = context.get('request')
+    request = context['request']
+    qs = list()
+    for k, v in request.GET.items():
+        if k == 'page':
+            continue
+        qs.append(u'%s=%s' % (k, v))
+    paginator_url = "%s?%s" % (request.path, '&'.join(qs))
+    if qs: paginator_url += '&'
     page_numbers = [n for n in range(context['page'] - adjacent_pages, \
                     context['page'] + adjacent_pages + 1) if n > 0 and \
                     n <= context['pages']]
-    request_url, paginator_url = '', ''
-    if request: request_url = request.get_full_path()
-    querystring = urlparse(request_url).query
-    if querystring == '': paginator_url += '?'
-    params = dict([part.split('=') for part in querystring.split('&')])
-    if 'page' in params: del params['page']
-    paginator_url = request.path + '&'.join(['%s=%s' % (k, v) for k, v \
-                                             in params.items()])
     return {
         'paginator_url': paginator_url,
         'is_paginated': context['is_paginated'],
