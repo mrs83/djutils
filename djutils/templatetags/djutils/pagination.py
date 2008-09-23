@@ -1,4 +1,5 @@
 from django import template
+from urlparse import urlparse
 
 register = template.Library()
 
@@ -17,8 +18,10 @@ def paginator(context, adjacent_pages=2):
                     context['page'] + adjacent_pages + 1) if n > 0 and \
                     n <= context['pages']]
     paginator_url = context.get('full_url', '')
-    if not paginator_url.endswith('?'):
-        paginator_url = "%s&" % paginator_url
+    if len(urlparse(paginator_url).params) > 0:
+        paginator_url += '&'
+    else:
+        paginator_url += '?'
 
     return {
         'paginator_url': paginator_url,
