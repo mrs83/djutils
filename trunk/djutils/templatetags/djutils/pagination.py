@@ -1,11 +1,10 @@
 from django import template
-from urlparse import urlparse
 
 register = template.Library()
 
 def paginator(context, adjacent_pages=2):
     """
-    http://www.djangosnippets.org/snippets/73/
+    Based on http://www.djangosnippets.org/snippets/73/
 
     To be used in conjunction with the object_list generic view.
 
@@ -13,16 +12,21 @@ def paginator(context, adjacent_pages=2):
     last page links in addition to those created by the object_list generic
     view.
 
+    You must add 'django.core.context_processors.request' to your
+    TEMPLATE_CONTEXT_PROCESSORS setting.
     """
+    request = context.get('request')
     page_numbers = [n for n in range(context['page'] - adjacent_pages, \
                     context['page'] + adjacent_pages + 1) if n > 0 and \
                     n <= context['pages']]
-    paginator_url = context.get('full_path', '')
-    if len(urlparse(paginator_url).params) > 0:
-        paginator_url += '&'
-    else:
-        paginator_url += '?'
-
+    request_url, paginator_url = '', ''
+    if request: request_url = request.get_full_path()
+    querystring = urlparse(request_url).query
+    if querystring == '': paginator_url += '?'
+    params = dict([part.split('=') for part in querystring.split('&')])
+    if 'page' in params: del params['page']
+    paginator_url = request.path + '&'.join(['%s=%s' % (k, v) for k, v \
+                                             in params.items()])
     return {
         'paginator_url': paginator_url,
         'is_paginated': context['is_paginated'],
