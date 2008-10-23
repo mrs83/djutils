@@ -58,7 +58,7 @@ class SimpleMenu(object):
         Example::
 
             <ul>
-                {% for item in menu_list %}
+                {% for item in item_list %}
                 <li{% if item.2 %} class="active"{% endif %}>
                     <a href="{{ item.1 }}">{{ item.0 }}</a>
                 </li>
@@ -68,7 +68,7 @@ class SimpleMenu(object):
         item_list = []
         for label, view in self.menus[menu_name]:
             item_list.append((label, reverse(view), view == active))
-        context = template.Context({'menu_list': menu_list, 'depth': depth})
+        context = template.Context({'item_list': item_list, 'depth': depth})
         return loader.get_template('menu.html').render(context)
 
 menu = SimpleMenu(settings.MENU_ITEMS)
