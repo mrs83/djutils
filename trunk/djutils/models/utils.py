@@ -1,14 +1,13 @@
-"""
-From http://www.djangosnippets.org/snippets/382/
-"""
-
 from django.db import transaction
 from django.db.models import get_models
+from django.template.defaultfilters import slugify
 from django.contrib.contenttypes.generic import GenericForeignKey
 
 @transaction.commit_manually
 def merge_model_objects(primary_object, *alias_objects):
     """
+    From http://www.djangosnippets.org/snippets/382/
+    
     Use this function to merge model objects (i.e. Users, Organizations, Polls, Etc.) and migrate all of the related fields from the alias objects the primary object.
     
     Usage:
@@ -97,3 +96,38 @@ def merge_model_objects(primary_object, *alias_objects):
         else:
             transaction.commit()
     return primary_object
+
+def unique_slug(value, model, slug_field='slug'):
+    """
+    From http://code.djangoproject.com/wiki/SlugifyUniquely
+
+    Returns a slug on a name which is unique within a model's table
+
+    This code suffers a race condition between when a unique
+    slug is determined and when the object with that slug is saved.
+    It's also not exactly database friendly if there is a high
+    likelyhood of common slugs being attempted.
+
+    A good usage pattern for this code would be to add a custom save()
+    method to a model with a slug field along the lines of::
+
+        from django.template.defaultfilters import slugify
+
+        def save(self):
+            if not self.id:
+                # replace self.name with your prepopulate_from field
+                self.slug = unique_slug(self.name, Article)
+
+        super(Article, self).save()
+
+    Original pattern discussed at
+    http://www.b-list.org/weblog/2006/11/02/django-tips-auto-populated-fields
+    """
+    suffix = 0
+    potential = base = slugify(value)
+    while True:
+        if suffix:
+            potential = '-'.join([base, str(suffix)])
+        if not model.objects.filter(**{slug_field: potential}).count():
+            return potential
+        suffix += 1
