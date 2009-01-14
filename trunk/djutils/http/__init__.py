@@ -8,7 +8,7 @@ __all__ = ['JsonResponse', 'XmlResponse', 'YamlResponse']
 
 class SerializedResponse(HttpResponse):
     def __init__(self, object):
-        content = self._serialize(self.format, object)
+        content = self._serialize(object)
         mimetype = getattr(self, 'mimetype', 'application/%s' % self.format)
         super(SerializedResponse, self).__init__(content, mimetype)
         
