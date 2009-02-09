@@ -6,6 +6,7 @@ from django import template
 from django.template import loader
 from django.conf import settings
 from django.core.urlresolvers import reverse
+from django.utils.translation import gettext
 
 register = template.Library()
 
@@ -67,7 +68,7 @@ class SimpleMenu(object):
         """
         item_list = []
         for label, view in self.menus[menu_name]:
-            item_list.append((label, reverse(view), view == active))
+            item_list.append((gettext(label), reverse(view), view == active))
         context = template.Context({'item_list': item_list, 'depth': depth})
         return loader.get_template('menu.html').render(context)
 
