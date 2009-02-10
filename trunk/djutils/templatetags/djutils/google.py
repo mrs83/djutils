@@ -7,13 +7,14 @@ register = Library()
 def urchin():
     if not getattr(settings, 'GOOGLE_ANALYTICS_KEY'):
         raise ImproperlyConfigured, 'GOOGLE_ANALYTICS_KEY setting is required'
-    return """
-<script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
+    return """<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%%3E%%3C/script%%3E"));
 </script>
 <script type="text/javascript">
-_uacct = "%s";
-urchinTracker();
-</script>
-""" % settings.GOOGLE_ANALYTICS_KEY
+try {
+var pageTracker = _gat._getTracker("%s");
+pageTracker._trackPageview();
+} catch(err) {}</script>""" % settings.GOOGLE_ANALYTICS_KEY
 
 register.simple_tag(urchin)
