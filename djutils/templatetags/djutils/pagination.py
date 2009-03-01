@@ -31,17 +31,17 @@ def paginator(context, adjacent_pages=2):
     return {
         'paginator_url': paginator_url,
         'is_paginated': context['is_paginated'],
-        'hits': context['hits'],
-        'results_per_page': context['results_per_page'],
-        'page': context['page'],
-        'pages': context['pages'],
+        'hits': context.get('hits'),
+        'results_per_page': context.get('results_per_page'),
+        'page': page,
+        'pages': pages,
         'page_numbers': page_numbers,
-        'next': context['next'],
-        'previous': context['previous'],
-        'has_next': context['has_next'],
-        'has_previous': context['has_previous'],
+        'next': context.get('next'),
+        'previous': context.get('previous'),
+        'has_next': context.get('has_next'),
+        'has_previous': context.get('has_previous'),
         'show_first': 1 not in page_numbers,
-        'show_last': context['pages'] not in page_numbers,
+        'show_last': pages not in page_numbers,
     }
 
 register.inclusion_tag('paginator.html', takes_context=True)(paginator)
