@@ -23,9 +23,11 @@ def paginator(context, adjacent_pages=2):
         qs.append(u'%s=%s' % (k, v))
     paginator_url = "%s?%s" % (request.path, '&'.join(qs))
     if qs: paginator_url += '&'
-    page_numbers = [n for n in range(context['page'] - adjacent_pages, \
-                    context['page'] + adjacent_pages + 1) if n > 0 and \
-                    n <= context['pages']]
+    page = context.get('page', 1)
+    pages = context.get('pages', 1)
+    page_numbers = [n for n in range(page - adjacent_pages, \
+                    page + adjacent_pages + 1) if n > 0 and \
+                    n <= pages]
     return {
         'paginator_url': paginator_url,
         'is_paginated': context['is_paginated'],
