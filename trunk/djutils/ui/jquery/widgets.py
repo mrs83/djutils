@@ -55,3 +55,17 @@ class Autocomplete(forms.TextInput):
             'attrs' : flatatt(final_attrs),
             'js' : self.render_js(final_attrs['id']),
         }
+
+class DatePicker(forms.TextInput):
+    def __init__(self, options={}, attrs={}):
+        self.options = JSONEncoder().encode(options)
+        self.attrs = attrs
+
+    def render_js(self, field_id):
+        return u'''<script type="text/javascript">
+        $('#%s').datepicker(%s);</script>''' % (field_id, self.options)
+    
+    def render(self, name, value=None, attrs=None):
+        final_attrs = self.build_attrs(attrs, name=name)
+        return super(DatePicker, self).render(name, value, attrs) + \
+               self.render_js(final_attrs['id'])
