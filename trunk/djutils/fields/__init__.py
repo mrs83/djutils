@@ -1,47 +1,46 @@
-# http://www.djangosnippets.org/snippets/513/
-
-from django.db import models
+import base64
 
 try:
     import cPickle as pickle
 except ImportError:
     import pickle
 
-class PickledObject(str):
-    """A subclass of string so it can be told whether a string is
-       a pickled object or not (if the object is an instance of this class
-       then it must [well, should] be a pickled one)."""
-    pass
+from django.db import models
 
-class PickledObjectField(models.Field):
-    __metaclass__ = models.SubfieldBase
-    
-    def to_python(self, value):
-        if isinstance(value, PickledObject):
-            # If the value is a definite pickle; and an error is raised in de-pickling
-            # it should be allowed to propogate.
-            return pickle.loads(str(value))
-        else:
-            try:
-                return pickle.loads(str(value))
-            except:
-                # If an error was raised, just return the plain value
-                return value
-    
-    def get_db_prep_save(self, value):
-        if value is not None and not isinstance(value, PickledObject):
-            value = PickledObject(pickle.dumps(value))
-        return value
-    
-    def get_internal_type(self): 
-        return 'TextField'
-    
+class PickleDescriptor(property):
+    def __init__(self, field):
+        self.field = field
+
+    def __get__(self, instance, owner):
+        if instance is None:
+            return self
+
+        if self.field.name not in instance.__dict__:
+            # The object hasn't been created yet so unpickle the data
+            raw_data = getattr(instance, self.field.attname)
+            value = self.field.unpickle(base64.b64decode(raw_data))
+            instance.__dict__[self.field.name] = value
+
+        return instance.__dict__[self.field.name]
+
+    def __set__(self, instance, value):
+        instance.__dict__[self.field.name] = value
+        pickled = base64.b64encode(self.field.pickle(value))
+        setattr(instance, self.field.attname, pickled)
+
+class PickleField(models.TextField):
+    def pickle(self, obj):
+        return pickle.dumps(obj, pickle.HIGHEST_PROTOCOL)
+
+    def unpickle(self, data):
+        return pickle.loads(data)
+
+    def get_attname(self):
+        return '%s_pickled' % self.name
+
     def get_db_prep_lookup(self, lookup_type, value):
-        if lookup_type == 'exact':
-            value = self.get_db_prep_save(value)
-            return super(PickledObjectField, self).get_db_prep_lookup(lookup_type, value)
-        elif lookup_type == 'in':
-            value = [self.get_db_prep_save(v) for v in value]
-            return super(PickledObjectField, self).get_db_prep_lookup(lookup_type, value)
-        else:
-            raise TypeError('Lookup type %s is not supported.' % lookup_type)
+        raise ValueError("Can't make comparisons against pickled data.")
+
+    def contribute_to_class(self, cls, name):
+        super(PickleField, self).contribute_to_class(cls, name)
+        setattr(cls, name, PickleDescriptor(self))
