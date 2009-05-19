@@ -1,6 +1,7 @@
 from django import template
 from django.db.models import get_model
 from django.contrib.comments.models import Comment
+from django.contrib.comments.templatetags import BaseCommentNode
 from django.contrib.contenttypes.models import ContentType
 
 register = template.Library()
@@ -76,3 +77,35 @@ def do_get_comments_for_user(parser, token):
     return UserCommentsNode(user, context_var, model)
 
 register.tag('get_comments_for_user', do_get_comments_for_user)
+
+class CommentQuerysetNode(BaseCommentNode):
+    """
+    This is a replacement for django comment's get_comment_list templatetag.
+    It returns queryset instead of a list.
+    """
+    def get_context_value_from_queryset(self, context, qs):
+        return qs
+
+#@register.tag
+def get_comment_queryset(parser, token):
+    """
+    Gets the queryset for the given params and populates the template
+    context with a variable containing that value, whose name is defined by the
+    'as' clause.
+
+    Syntax::
+
+        {% get_comment_queryset for [object] as [varname]  %}
+        {% get_comment_queryset for [app].[model] [object_id] as [varname]  %}
+
+    Example usage::
+
+        {% get_comment_queryset for event as comment_list %}
+        {% for comment in comment_list|slice:":10" %}
+            ...
+        {% endfor %}
+
+    """
+    return CommentQuerysetNode.handle_token(parser, token)
+
+register.tag(get_comment_queryset)
