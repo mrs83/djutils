@@ -1,7 +1,7 @@
 from django import template
 from django.db.models import get_model
 from django.contrib.comments.models import Comment
-from django.contrib.comments.templatetags import BaseCommentNode
+from django.contrib.comments.templatetags.comments import BaseCommentNode
 from django.contrib.contenttypes.models import ContentType
 
 register = template.Library()
