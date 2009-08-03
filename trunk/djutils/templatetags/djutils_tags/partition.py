@@ -5,7 +5,7 @@ Template filters to partition lists into rows or columns.
 
 A common use-case is for splitting a list into a table with columns::
 
-    {% load djutils.partition %}
+    {% load djutils_tags.partition %}
     <table>
     {% for row in mylist|columns:3 %}
         <tr>
