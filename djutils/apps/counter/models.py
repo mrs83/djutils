@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 from django.contrib.auth.models import User
-from djutils.counter.managers import ObjectCounterManager
+from djutils.apps.counter.managers import ObjectCounterManager
 
 class ObjectCounter(models.Model):
     content_type = models.ForeignKey(ContentType)
