@@ -4,7 +4,7 @@ from django.utils.safestring import mark_safe
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext as _
 from django.utils.encoding import force_unicode
-from djutils.captcha.middleware import get_current_captcha
+from djutils.apps.captcha.middleware import get_current_captcha
 
 CAPTCHA_IMAGE = """
 <div class="captcha">

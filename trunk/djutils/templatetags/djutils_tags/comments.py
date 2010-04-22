@@ -13,7 +13,10 @@ class UserCommentCountNode(template.Node):
 
     def render(self, context):
         user = template.Variable(self.user).resolve(context)
-        count = Comment.objects.filter(user=user, is_public=True).count()
+        if not user.is_active:
+            count = 0
+        else:
+            count = Comment.objects.filter(user=user, is_public=True).count()
         context[self.context_var] = count
         return ''
 
@@ -42,8 +45,11 @@ class UserCommentsNode(template.Node):
 
     def render(self, context):
         user = template.Variable(self.user).resolve(context)
-        queryset = Comment.objects.filter(user=user, is_public=True)
-        if self.model:
+        if not user.is_active:
+            queryset = Comment.objects.none()
+        else:    
+            queryset = Comment.objects.filter(user=user, is_public=True)
+        if self.model and user.is_active:
             model = get_model(*self.model.split('.'))
             ctype = ContentType.objects.get_for_model(model)
             queryset = queryset.filter(content_type=ctype)
@@ -84,7 +90,7 @@ class CommentQuerysetNode(BaseCommentNode):
     It returns queryset instead of a list.
     """
     def get_context_value_from_queryset(self, context, qs):
-        return qs
+        return qs.filter(user__is_active=True)
 
 #@register.tag
 def get_comment_queryset(parser, token):
