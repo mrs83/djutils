@@ -1,0 +1,1 @@
+djutils is a collection of django utilities for django-based web applications
